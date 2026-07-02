@@ -177,8 +177,20 @@ function selectMemo(id, paneId = state.activePaneId) {
   if (typeof paneId !== 'string') {
     paneId = state.activePaneId;
   }
-  // 指定されたペインの開いているタブ情報を更新
   const paneState = state.panes[paneId];
+  
+  // 1. web- タブが選ばれた場合
+  if (typeof id === 'string' && id.startsWith('web-')) {
+    paneState.activeMemoId = id;
+    if (paneId === state.activePaneId) {
+      state.activeMemoId = id;
+    }
+    document.querySelectorAll('.memo-item').forEach(e => e.classList.remove('active'));
+    const url = id.substring(4);
+    openWebViewer(url, paneId);
+    renderPaneTabs(paneId);
+    return;
+  }
   if (!paneState.openMemoIds.includes(id)) {
     paneState.openMemoIds.push(id);
   }
@@ -237,6 +249,14 @@ function selectMemo(id, paneId = state.activePaneId) {
   });
 
   const pel = getPaneEl(paneId);
+  
+  // 通常メモが選択されたので、WEBビューアが開いていれば閉じてiframeを破棄する
+  if (pel.externalWebPane && pel.externalWebPane.style.display === 'flex') {
+    pel.externalWebPane.style.display = 'none';
+    if (pel.webBtn) pel.webBtn.classList.remove('active');
+    pel.webIframeContainer.innerHTML = '';
+  }
+
   pel.emptyState.style.display = 'none';
   pel.memoTitle.value = memo.title;
   pel.memoContent.value = memo.content;
@@ -282,6 +302,24 @@ function selectMemo(id, paneId = state.activePaneId) {
 
   // タブリストを再描画
   renderPaneTabs(paneId);
+
+  // Webビューアカードの自動起動検知
+  if (memo && memo.content) {
+    const lines = memo.content.trim().split('\n');
+    const firstLine = lines[0].trim();
+    if (/^https?:\/\/[^\s]+$/.test(firstLine)) {
+      let pageInfo = '';
+      if (lines.length > 1) {
+        const match = lines[1].match(/page_info:\s*([^\s]+)/);
+        if (match) {
+          pageInfo = match[1];
+        }
+      }
+      setTimeout(() => {
+        executeCommand('web', [firstLine, pageInfo]);
+      }, 100);
+    }
+  }
 }
 
 function applyMemoPermissions(memo, paneId = state.activePaneId) {
@@ -1853,15 +1891,34 @@ function renderPaneTabs(paneId) {
   }
   
   paneState.openMemoIds.forEach(memoId => {
-    const memo = state.memos.find(m => m.id === memoId);
-    if (!memo) return;
+    let title = '無題のメモ';
+    let isWeb = false;
+    let url = '';
+    
+    if (typeof memoId === 'string' && memoId.startsWith('web-')) {
+      isWeb = true;
+      url = memoId.substring(4);
+      try {
+        title = new URL(url).hostname;
+      } catch(e) {
+        title = url;
+      }
+      if (title.length > 20) {
+        title = title.substring(0, 18) + '...';
+      }
+      title = '🌐 ' + title;
+    } else {
+      const memo = state.memos.find(m => m.id === memoId);
+      if (!memo) return;
+      title = memo.title || '無題のメモ';
+    }
     
     const tab = document.createElement('div');
     tab.className = `pane-tab-item ${memoId === paneState.activeMemoId ? 'active' : ''}`;
     tab.setAttribute('data-memo-id', memoId);
     
     tab.innerHTML = `
-      <span class="pane-tab-title" title="${escape(memo.title || '無題のメモ')}">${escape(memo.title || '無題のメモ')}</span>
+      <span class="pane-tab-title" title="${escape(isWeb ? url : title)}">${escape(title)}</span>
       <button class="pane-tab-close-btn" title="閉じる">
         <i data-lucide="x" style="width:12px; height:12px;"></i>
       </button>
@@ -1891,6 +1948,16 @@ function closePaneTab(paneId, memoId) {
   const paneState = state.panes[paneId];
   paneState.openMemoIds = paneState.openMemoIds.filter(id => id !== memoId);
   
+  // もしWEBタブなら、iframeを完全に破棄する
+  if (typeof memoId === 'string' && memoId.startsWith('web-')) {
+    const pel = getPaneEl(paneId);
+    if (paneState.activeMemoId === memoId) {
+      pel.webIframeContainer.innerHTML = '';
+      pel.externalWebPane.style.display = 'none';
+      if (pel.webBtn) pel.webBtn.classList.remove('active');
+    }
+  }
+  
   if (paneState.activeMemoId === memoId) {
     if (paneState.openMemoIds.length > 0) {
       const nextActiveId = paneState.openMemoIds[paneState.openMemoIds.length - 1];
@@ -1912,6 +1979,13 @@ function clearPaneEditor(paneId) {
   }
   
   const pel = getPaneEl(paneId);
+  if (pel.externalWebPane) {
+    pel.externalWebPane.style.display = 'none';
+    pel.webIframeContainer.innerHTML = '';
+  }
+  if (pel.webBtn) {
+    pel.webBtn.classList.remove('active');
+  }
   pel.memoTitle.value = '';
   pel.memoContent.value = '';
   pel.markdownPreview.innerHTML = '';

@@ -269,7 +269,13 @@ function getPaneEl(paneId) {
     tabsList: document.getElementById(`${paneId}-tabsList`),
     toggleTabsBtn: document.getElementById(`${paneId}-toggleTabsBtn`),
     openTabsBtn: document.getElementById(`${paneId}-openTabsBtn`),
-    container: document.getElementById(`pane-${paneId}`)
+    container: document.getElementById(`pane-${paneId}`),
+    webBtn: document.getElementById(`${paneId}-webBtn`),
+    externalWebPane: document.getElementById(`${paneId}-externalWebPane`),
+    webAddressInput: document.getElementById(`${paneId}-webAddressInput`),
+    webGoBtn: document.getElementById(`${paneId}-webGoBtn`),
+    webTransferBtn: document.getElementById(`${paneId}-webTransferBtn`),
+    webIframeContainer: document.getElementById(`${paneId}-webIframeContainer`)
   };
 }
 

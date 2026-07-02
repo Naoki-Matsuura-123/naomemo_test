@@ -207,12 +207,13 @@ async function runAdjustedRatingCalculation() {
   const memoId = paneState.activeMemoId;
   if (!memoId) return;
 
-  const draft = state.adjustedRatingFilterDraft;
+  // グローバルドラフトを複製してAPIリクエスト用のオブジェクトを作成 (状態変異バグの修正)
+  const reqBody = JSON.parse(JSON.stringify(state.adjustedRatingFilterDraft));
 
   // フィルターが空の場合は、デフォルトで全ユーザーを含めて処理
-  if (draft.included_role_ids.length === 0 && draft.included_user_ids.length === 0) {
+  if (reqBody.included_role_ids.length === 0 && reqBody.included_user_ids.length === 0) {
     if (state.cachedUsers) {
-      draft.included_user_ids = state.cachedUsers.map(u => u.id);
+      reqBody.included_user_ids = state.cachedUsers.map(u => u.id);
     }
   }
 
@@ -231,20 +232,20 @@ async function runAdjustedRatingCalculation() {
     const res = await fetch(`${API_URL}/memos/${memoId}/calculate-adjusted-rating`, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(draft)
+      body: JSON.stringify(reqBody)
     });
 
     if (res.ok) {
       const result = await res.json();
       
-      // メモキャッシュを更新
+      // メモキャッシュを更新 (ユーザーが指定したフィルターそのものを保存する)
       state.memos = state.memos.map(m => {
         if (m.id === memoId) {
           return {
             ...m,
             adjusted_rating: result.adjusted_rating,
             adjusted_rating_calculated_at: result.calculated_at,
-            adjusted_rating_params: JSON.stringify(draft)
+            adjusted_rating_params: JSON.stringify(state.adjustedRatingFilterDraft)
           };
         }
         return m;

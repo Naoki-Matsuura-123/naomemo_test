@@ -60,6 +60,8 @@ function switchAdminTab(tabName) {
     loadAdminAuditLogs();
   } else if (tabName === 'tags') {
     loadAdminTags();
+  } else if (tabName === 'domains') {
+    loadAdminDomains();
   }
 }
 
@@ -1093,4 +1095,266 @@ window.openTransferModal = openTransferModal;
 window.deleteMemoByAdmin = deleteMemoByAdmin;
 window.removeUserFromRole = removeUserFromRole;
 window.deleteTagByAdmin = deleteTagByAdmin;
+
+// --- ドメイン互換性管理機能 ---
+
+async function loadAdminDomains() {
+  try {
+    const res = await fetch(`${API_URL}/admin/domains`, {
+      headers: {
+        'Authorization': `Bearer ${state.token}`,
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      domainCache = data;
+      renderAdminDomains();
+    } else {
+      showToast("ドメインリストの取得に失敗しました", "shield-alert");
+    }
+  } catch (e) {
+    showToast("サーバー通信エラー", "shield-alert");
+  }
+}
+
+function renderAdminDomains() {
+  const tbody = document.getElementById('adminDomainTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (domainCache.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:1.5rem; color:var(--text-muted);">登録されているドメインはありません。</td></tr>`;
+    return;
+  }
+
+  domainCache.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--panel-border)';
+    
+    const verifyDate = item.last_verified_at ? new Date(item.last_verified_at).toLocaleString() : '未検証';
+    const statusText = item.can_sync ? '同期可能' : '同期不可';
+    const statusColor = item.can_sync ? 'var(--success)' : 'var(--danger)';
+    
+    tr.innerHTML = `
+      <td style="padding:0.75rem 1rem; color:var(--text-main); font-weight:500;">${escape(item.domain)}</td>
+      <td style="padding:0.75rem 1rem;">
+        <span style="color:${statusColor}; font-weight:600;">${statusText}</span>
+        <button onclick="toggleDomainSync(${item.id}, ${item.can_sync})" style="margin-left: 0.5rem; font-size: 0.7rem; padding: 0.1rem 0.3rem; border: 1px solid var(--panel-border); border-radius: 4px; background: var(--bg); color: var(--text-sub); cursor: pointer;">切替</button>
+      </td>
+      <td style="padding:0.75rem 1rem; color:var(--text-muted); font-size: 0.8rem;">${verifyDate}</td>
+      <td style="padding:0.75rem 1rem; text-align:center;">
+        <button class="btn-secondary" onclick="deleteDomainByAdmin(${item.id})" style="padding:0.25rem 0.5rem; font-size:0.75rem; color:var(--danger); border-color:rgba(239, 68, 68, 0.2); height: 26px; width: auto; min-width: 50px;">削除</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  safeCreateIcons();
+}
+
+async function toggleDomainSync(domainId, currentCanSync) {
+  const item = domainCache.find(d => d.id === domainId);
+  if (!item) return;
+
+  try {
+    const res = await fetch(`${API_URL}/admin/domains`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`,
+        'ngrok-skip-browser-warning': 'true'
+      },
+      body: JSON.stringify({
+        domain: item.domain,
+        can_sync: !currentCanSync
+      })
+    });
+    if (res.ok) {
+      showToast("同期設定を切り替えました", "check");
+      loadAdminDomains();
+    } else {
+      showToast("設定変更に失敗しました", "shield-alert");
+    }
+  } catch (e) {
+    showToast("サーバー通信エラー", "shield-alert");
+  }
+}
+
+async function deleteDomainByAdmin(domainId) {
+  if (!confirm("このドメインの互換性設定を削除しますか？")) return;
+
+  try {
+    const res = await fetch(`${API_URL}/admin/domains/${domainId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${state.token}`,
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
+    if (res.ok) {
+      showToast("ドメイン設定を削除しました", "check");
+      loadAdminDomains();
+    } else {
+      showToast("削除に失敗しました", "shield-alert");
+    }
+  } catch (e) {
+    showToast("サーバー通信エラー", "shield-alert");
+  }
+}
+
+// ドメインの手動追加フォームイベント
+window.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('adminDomainAddForm');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const domainInput = document.getElementById('newDomainInput');
+      const syncCheck = document.getElementById('newDomainSyncCheck');
+      if (!domainInput) return;
+
+      const domain = domainInput.value.trim().toLowerCase();
+      const canSync = syncCheck ? syncCheck.checked : true;
+
+      try {
+        const res = await fetch(`${API_URL}/admin/domains`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${state.token}`,
+            'ngrok-skip-browser-warning': 'true'
+          },
+          body: JSON.stringify({
+            domain: domain,
+            can_sync: canSync
+          })
+        });
+        if (res.ok) {
+          showToast("ドメインを追加しました", "check");
+          domainInput.value = '';
+          loadAdminDomains();
+        } else {
+          showToast("ドメイン追加に失敗しました", "shield-alert");
+        }
+      } catch (ex) {
+        showToast("サーバー通信エラー", "shield-alert");
+      }
+    });
+  }
+
+  // 一括検証 (Scan All) ボタンのバインド
+  const verifyBtn = document.getElementById('btnVerifyAllDomains');
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', runAllDomainsVerification);
+  }
+});
+
+// 各ドメインの一括検証処理（非同期ループ）
+async function runAllDomainsVerification() {
+  if (domainCache.length === 0) {
+    showToast("検証するドメインがありません", "shield-alert");
+    return;
+  }
+
+  if (!confirm("登録済みの全ドメインについて、同期疎通スキャンを開始しますか？")) return;
+
+  const progressContainer = document.getElementById('domainScanProgressContainer');
+  const progressBar = document.getElementById('domainScanProgressBar');
+  const progressRatio = document.getElementById('domainScanProgressRatio');
+  const statusText = document.getElementById('domainScanStatusText');
+  const hiddenContainer = document.getElementById('hiddenVerifyContainer');
+
+  if (progressContainer) progressContainer.style.display = 'block';
+  statusText.textContent = "スキャンを初期化中...";
+
+  const total = domainCache.length;
+  let count = 0;
+
+  for (let i = 0; i < total; i++) {
+    const item = domainCache[i];
+    statusText.textContent = `検証中: ${item.domain} (${i + 1}/${total})`;
+    if (progressRatio) progressRatio.textContent = `${i + 1} / ${total}`;
+    if (progressBar) progressBar.style.width = `${((i + 1) / total) * 100}%`;
+
+    // 個別のドメイン検証処理を実行
+    const canSync = await verifySingleDomainInContainer(item.domain, hiddenContainer);
+    
+    // 結果をDBに更新
+    await saveDomainCompatibility(item.domain, canSync);
+  }
+
+  statusText.textContent = "スキャン完了";
+  showToast("全ドメインの一括検証が完了しました！", "check");
+  setTimeout(() => {
+    if (progressContainer) progressContainer.style.display = 'none';
+    loadAdminDomains();
+  }, 2000);
+}
+
+// 非表示 iframe を用いた単一ドメインの同期機能検証（Promise）
+function verifySingleDomainInContainer(domain, container) {
+  return new Promise((resolve) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    
+    // プロキシURL
+    const testUrl = `https://${domain}`;
+    iframe.src = `${API_URL}/proxy-html?url=${encodeURIComponent(testUrl)}`;
+    
+    let resolved = false;
+
+    const cleanup = () => {
+      window.removeEventListener('message', messageHandler);
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    };
+
+    const messageHandler = (event) => {
+      const data = event.data;
+      if (data && data.type === 'STATE_RESPONSE') {
+        resolved = true;
+        cleanup();
+        resolve(true); // 応答あり -> 同期可能
+      }
+    };
+
+    // 親ウィンドウで message イベントを監視
+    window.addEventListener('message', messageHandler);
+
+    iframe.onload = () => {
+      // 読み込み完了後に状態を要求
+      setTimeout(() => {
+        if (resolved) return;
+        try {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'REQUEST_STATE' }, '*');
+          }
+        } catch (e) {
+          // クロスオリジン起因などでアクセスできない場合（通常プロキシが失敗している等）
+          resolved = true;
+          cleanup();
+          resolve(false);
+        }
+      }, 500);
+    };
+
+    container.appendChild(iframe);
+
+    // 2.5秒でタイムアウト判定（同期不可）
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        cleanup();
+        resolve(false);
+      }
+    }, 2500);
+  });
+}
+
+// グローバル公開
+window.loadAdminDomains = loadAdminDomains;
+window.toggleDomainSync = toggleDomainSync;
+window.deleteDomainByAdmin = deleteDomainByAdmin;
+window.runAllDomainsVerification = runAllDomainsVerification;
+
 

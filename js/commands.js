@@ -3,7 +3,7 @@ const commandsList = [
   { id: 'help', name: '/help', desc: '操作ヘルプとマークダウン記法ガイドを表示します', shortcut: 'Help Button', action: () => { el.helpModal.classList.add('active'); safeCreateIcons(); } },
   { id: 'voice', name: '/voice', desc: '音声入力の開始・停止をトグル切り替えします', shortcut: 'Mic Button', action: () => toggleListening() },
   { id: 'preview', name: '/preview', desc: 'マークダウンプレビュー表示 of ON/OFFを切り替えます', shortcut: 'Eye Button', action: () => togglePreview() },
-  { id: 'link', name: '/link', desc: 'このメモを繋ぐWiki風マークダウンリンクをコピーします', shortcut: 'Link Button', action: () => copyMemoLink() },
+  { id: 'link', name: '/link', desc: 'マークダウンのリンク雛形を挿入します（選択テキストはリンク化）', shortcut: 'Link Button', action: () => insertLinkTemplate() },
   { id: 'download', name: '/download', desc: 'このメモを画像付きのZIPパッケージ（Markdown + 画像）としてダウンロードします', shortcut: '📥 Download', action: () => downloadMemo(state.activePaneId) },
   { id: 'grid', name: '/grid', desc: 'グリッド段組テンプレート (1〜3列) を挿入します', shortcut: '📊 Grid', action: () => openGridTemplateModal() },
   { id: 'image', name: '/image', desc: 'アップロード済み画像の一覧から選択して再利用します', shortcut: '🖼️ Image', action: () => openImageReuseModal() },
@@ -21,8 +21,45 @@ const commandsList = [
   { id: 'theme-nord', name: '/theme-nord', desc: '画面テーマを落ち着きある「ノルディック」に変更します', shortcut: 'Nord Theme', action: () => { applyTheme('theme-nord'); const lt = document.getElementById('left-themeSelect'); if (lt) lt.value = 'theme-nord'; const rt = document.getElementById('right-themeSelect'); if (rt) rt.value = 'theme-nord'; } },
   { id: 'rate-get', name: '/rate-get', desc: '評価サマリーを取得しクリップボードにコピーします', shortcut: '📋 Get Ratings', action: () => getRatingsCommand() },
   { id: 'rate-show', name: '/rate-show', desc: '現在の評価サマリーをエディタに挿入します', shortcut: '📊 Show Ratings', action: () => showRatingsCommand() },
-  { id: 'clear', name: '/clear', desc: 'エディタ表示を閉じ、現在のメモの選択状態をクリアします', shortcut: 'Close View', action: () => closeWorkspace() }
+  { id: 'clear', name: '/clear', desc: 'エディタ表示を閉じ、現在のメモの選択状態をクリアします', shortcut: 'Close View', action: () => closeWorkspace() },
+  { id: 'web', name: '/web', desc: '外部Webビューアで指定されたページを開きます。/web [base_url] [subpath]', shortcut: '🌐 Web', action: (args) => executeWebCommand(args) }
 ];
+
+// リンク雛形の挿入
+function insertLinkTemplate() {
+  const pel = getPaneEl(state.activePaneId);
+  const textarea = pel.memoContent;
+  if (!textarea) return;
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const val = textarea.value;
+
+  const selectedText = val.substring(start, end);
+  let template = '';
+  let selectStart = start;
+  let selectEnd = start;
+
+  if (selectedText.length > 0) {
+    // ユーザーがテキストを選択している場合、それをリンクテキストとして使用し、url部分を選択状態にする
+    template = `[${selectedText}](url)`;
+    selectStart = start + selectedText.length + 3; // `[selectedText](` の後
+    selectEnd = selectStart + 3; // `url` の長さ
+  } else {
+    // 選択されていない場合、[リンクテキスト](url) を挿入し、リンクテキストを選択状態にする
+    template = `[リンクテキスト](url)`;
+    selectStart = start + 1; // `[` の後
+    selectEnd = selectStart + 6; // `リンクテキスト` の長さ
+  }
+
+  textarea.value = val.substring(0, start) + template + val.substring(end);
+  textarea.setSelectionRange(selectStart, selectEnd);
+
+  // オートセーブをトリガー
+  textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  textarea.focus();
+  showToast('リンクの雛形を挿入しました', 'link');
+}
 
 // 折りたたみ（アコーディオン）ブロックの挿入
 function insertAccordion() {
@@ -283,7 +320,7 @@ function renderHelpCommands() {
 }
 
 // コマンドの実行処理
-function executeCommand(cmdId) {
+function executeCommand(cmdId, args = []) {
   // 1. 各種モーダルを閉じる
   el.commandPaletteModal.classList.remove('active');
   el.helpModal.classList.remove('active');
@@ -309,7 +346,7 @@ function executeCommand(cmdId) {
   const cmd = commandsList.find(c => c.id === cmdId);
   if (cmd) {
     showToast(`コマンド「${cmd.name}」を実行しました`, 'terminal');
-    setTimeout(() => cmd.action(), 50);
+    setTimeout(() => cmd.action(args), 50);
   }
 }
 

@@ -232,6 +232,9 @@
               </div>
               
               <div class="editor-controls">
+                <button class="btn-secondary" id="left-webBtn" title="Webビューアの起動">
+                  <i data-lucide="globe" style="width:14px; height:14px;"></i><span>Web</span>
+                </button>
                 <button class="btn-secondary" id="left-linkCopyBtn" title="メモリンクをコピー" style="display: none;">
                   <i data-lucide="link" style="width:14px; height:14px;"></i><span>リンクをコピー</span>
                 </button>
@@ -260,38 +263,8 @@
             <div class="editor-viewport">
               <!-- メタデータアコーディオン -->
               <div class="meta-accordion-content collapsed" id="left-metaAccordionContent">
-                <div class="rating-panel" id="left-ratingPanel" style="display:none;">
-                  <div class="rating-panel-header" onclick="toggleRatingPanel('left')" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="rating-panel-title" style="display: flex; align-items: center;">
-                      <span class="rating-toggle-icon" id="left-ratingToggleIcon"><i data-lucide="chevron-down" style="width:14px; height:14px;"></i></span>
-                      <i data-lucide="star" style="width:14px; height:14px; color:var(--warning); margin-right: 4px;"></i>
-                      <span>評価</span>
-                    </div>
-                    <div id="left-ratingFilterContainer" onclick="event.stopPropagation()" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--text-sub);">
-                      <span>集計対象:</span>
-                      <select id="left-ratingFilterSelect" onchange="changeRatingFilter('left')" style="background: var(--bg); border: 1px solid var(--panel-border); color: var(--text-main); font-size: 0.7rem; padding: 0.1rem 0.3rem; border-radius: 4px; outline: none; cursor: pointer; font-family: inherit;">
-                        <option value="all">全員</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="rating-panel-content" id="left-ratingPanelContent">
-                    <div id="left-ratingAxesList"></div>
-                    <div class="rating-summary-row" id="left-ratingSummaryRow" style="display:none;"></div>
-                    <div id="left-adjustedRatingContainer" class="adjusted-rating-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--panel-border); font-size: 0.75rem;">
-                      <div style="display: flex; align-items: center; gap: 0.25rem;">
-                        <i data-lucide="trending-up" style="width:13px; height:13px; color: var(--accent);"></i>
-                        <span style="font-weight: 600;">偏差補正平均:</span>
-                        <span id="left-adjustedRatingValue" style="color: var(--accent); font-weight: bold;">未計算</span>
-                      </div>
-                      <button type="button" class="btn-icon" id="left-btnOpenAdjustedRating" onclick="openAdjustedRatingModal('left')" title="偏差補正評価を計算" style="padding: 2px 6px; font-size: 0.7rem; border: 1px solid var(--panel-border); border-radius: 4px; display: flex; align-items: center; gap: 0.2rem;">
-                        <i data-lucide="settings" style="width:11px; height:11px;"></i>
-                        <span>補正計算</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
-                <div id="left-memoFolderContainer" style="display:none; align-items:center; gap:0.4rem; font-size:0.8rem; margin-bottom:0.75rem; color:var(--text-sub); position:relative;">
+<div id="left-memoFolderContainer" style="display:none; align-items:center; gap:0.4rem; font-size:0.8rem; margin-bottom:0.75rem; color:var(--text-sub); position:relative;">
                   <i data-lucide="folder" style="width:14px; height:14px; color:var(--accent);"></i>
                   <span>所属フォルダ:</span>
                   <select id="left-memoFolderSelect" style="display:none;"></select>
@@ -330,6 +303,37 @@
                   </button>
                   <input type="file" id="left-imageUploadInput" accept="image/*" style="display:none;">
                 </div>
+
+                <div class="rating-panel" id="left-ratingPanel" style="display:none;">
+                  <div class="rating-panel-header" onclick="toggleRatingPanel('left')" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="rating-panel-title" style="display: flex; align-items: center;">
+                      <span class="rating-toggle-icon" id="left-ratingToggleIcon"><i data-lucide="chevron-down" style="width:14px; height:14px;"></i></span>
+                      <i data-lucide="star" style="width:14px; height:14px; color:var(--warning); margin-right: 4px;"></i>
+                      <span>評価</span>
+                    </div>
+                    <div id="left-ratingFilterContainer" onclick="event.stopPropagation()" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--text-sub);">
+                      <span>集計対象:</span>
+                      <select id="left-ratingFilterSelect" onchange="changeRatingFilter('left')" style="background: var(--bg); border: 1px solid var(--panel-border); color: var(--text-main); font-size: 0.7rem; padding: 0.1rem 0.3rem; border-radius: 4px; outline: none; cursor: pointer; font-family: inherit;">
+                        <option value="all">全員</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="rating-panel-content" id="left-ratingPanelContent">
+                    <div id="left-ratingAxesList"></div>
+                    <div class="rating-summary-row" id="left-ratingSummaryRow" style="display:none;"></div>
+                    <div id="left-adjustedRatingContainer" class="adjusted-rating-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--panel-border); font-size: 0.75rem;">
+                      <div style="display: flex; align-items: center; gap: 0.25rem;">
+                        <i data-lucide="trending-up" style="width:13px; height:13px; color: var(--accent);"></i>
+                        <span style="font-weight: 600;">偏差補正平均:</span>
+                        <span id="left-adjustedRatingValue" style="color: var(--accent); font-weight: bold;">未計算</span>
+                      </div>
+                      <button type="button" class="btn-icon" id="left-btnOpenAdjustedRating" onclick="openAdjustedRatingModal('left')" title="偏差補正評価を計算" style="padding: 2px 6px; font-size: 0.7rem; border: 1px solid var(--panel-border); border-radius: 4px; display: flex; align-items: center; gap: 0.2rem;">
+                        <i data-lucide="settings" style="width:11px; height:11px;"></i>
+                        <span>補正計算</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- タイトル行 (アコーディオントグル + タイトル) -->
@@ -341,6 +345,25 @@
               </div>
               <textarea class="content-textarea" id="left-memoContent" placeholder="内容を入力してください... (マークダウン対応)" disabled></textarea>
               <div class="preview-container" id="left-markdownPreview"></div>
+
+              <!-- 外部Webビューアコンテナ -->
+              <div class="external-web-pane" id="left-externalWebPane" style="display: none; flex-direction: column; height: 100%; width: 100%;">
+                <div class="web-address-bar" style="display: flex; gap: 0.5rem; padding: 0.5rem; border-bottom: 1px solid var(--panel-border); background: var(--sidebar-bg); align-items: center;">
+                  <input type="text" id="left-webAddressInput" placeholder="https://example.com" style="flex: 1; padding: 0.4rem 0.75rem; border: 1px solid var(--panel-border); border-radius: 6px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.85rem;" />
+                  <button type="button" class="btn-primary" id="left-webGoBtn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.85rem; height: 32px; display: flex; align-items: center; justify-content: center;">移動</button>
+                  <button type="button" class="btn-secondary" id="left-webAddMemoBtn" title="現在のURLをメモに追加/新規作成" style="width: auto; padding: 0.4rem 1rem; font-size: 0.85rem; height: 32px; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                    <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                    <span>追加</span>
+                  </button>
+                  <button type="button" class="btn-secondary" id="left-webTransferBtn" title="反対側のペインへ移動して同期" style="padding: 0.4rem; height: 32px; width: 32px; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="arrow-right-left" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+                <div class="web-iframe-container" id="left-webIframeContainer" style="flex: 1; position: relative; background: #fff;">
+                  <!-- iframeが動的に生成される -->
+                  <div class="web-hover-status" id="left-webHoverStatus" style="display: none;"></div>
+                </div>
+              </div>
 
               <div class="editor-empty-state" id="left-emptyState">
                 <p>メモを選択するか、新しく作成してください。</p>
@@ -384,6 +407,9 @@
               </div>
               
               <div class="editor-controls">
+                <button class="btn-secondary" id="right-webBtn" title="Webビューアの起動">
+                  <i data-lucide="globe" style="width:14px; height:14px;"></i><span>Web</span>
+                </button>
                 <button class="btn-secondary" id="right-linkCopyBtn" title="メモリンクをコピー" style="display: none;">
                   <i data-lucide="link" style="width:14px; height:14px;"></i><span>リンクをコピー</span>
                 </button>
@@ -412,38 +438,8 @@
             <div class="editor-viewport">
               <!-- メタデータアコーディオン -->
               <div class="meta-accordion-content collapsed" id="right-metaAccordionContent">
-                <div class="rating-panel" id="right-ratingPanel" style="display:none;">
-                  <div class="rating-panel-header" onclick="toggleRatingPanel('right')" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="rating-panel-title" style="display: flex; align-items: center;">
-                      <span class="rating-toggle-icon" id="right-ratingToggleIcon"><i data-lucide="chevron-down" style="width:14px; height:14px;"></i></span>
-                      <i data-lucide="star" style="width:14px; height:14px; color:var(--warning); margin-right: 4px;"></i>
-                      <span>評価</span>
-                    </div>
-                    <div id="right-ratingFilterContainer" onclick="event.stopPropagation()" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--text-sub);">
-                      <span>集計対象:</span>
-                      <select id="right-ratingFilterSelect" onchange="changeRatingFilter('right')" style="background: var(--bg); border: 1px solid var(--panel-border); color: var(--text-main); font-size: 0.7rem; padding: 0.1rem 0.3rem; border-radius: 4px; outline: none; cursor: pointer; font-family: inherit;">
-                        <option value="all">全員</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="rating-panel-content" id="right-ratingPanelContent">
-                    <div id="right-ratingAxesList"></div>
-                    <div class="rating-summary-row" id="right-ratingSummaryRow" style="display:none;"></div>
-                    <div id="right-adjustedRatingContainer" class="adjusted-rating-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--panel-border); font-size: 0.75rem;">
-                      <div style="display: flex; align-items: center; gap: 0.25rem;">
-                        <i data-lucide="trending-up" style="width:13px; height:13px; color: var(--accent);"></i>
-                        <span style="font-weight: 600;">偏差補正平均:</span>
-                        <span id="right-adjustedRatingValue" style="color: var(--accent); font-weight: bold;">未計算</span>
-                      </div>
-                      <button type="button" class="btn-icon" id="right-btnOpenAdjustedRating" onclick="openAdjustedRatingModal('right')" title="偏差補正評価を計算" style="padding: 2px 6px; font-size: 0.7rem; border: 1px solid var(--panel-border); border-radius: 4px; display: flex; align-items: center; gap: 0.2rem;">
-                        <i data-lucide="settings" style="width:11px; height:11px;"></i>
-                        <span>補正計算</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
-                <div id="right-memoFolderContainer" style="display:none; align-items:center; gap:0.4rem; font-size:0.8rem; margin-bottom:0.75rem; color:var(--text-sub); position:relative;">
+<div id="right-memoFolderContainer" style="display:none; align-items:center; gap:0.4rem; font-size:0.8rem; margin-bottom:0.75rem; color:var(--text-sub); position:relative;">
                   <i data-lucide="folder" style="width:14px; height:14px; color:var(--accent);"></i>
                   <span>所属フォルダ:</span>
                   <select id="right-memoFolderSelect" style="display:none;"></select>
@@ -482,6 +478,37 @@
                   </button>
                   <input type="file" id="right-imageUploadInput" accept="image/*" style="display:none;">
                 </div>
+
+                <div class="rating-panel" id="right-ratingPanel" style="display:none;">
+                  <div class="rating-panel-header" onclick="toggleRatingPanel('right')" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="rating-panel-title" style="display: flex; align-items: center;">
+                      <span class="rating-toggle-icon" id="right-ratingToggleIcon"><i data-lucide="chevron-down" style="width:14px; height:14px;"></i></span>
+                      <i data-lucide="star" style="width:14px; height:14px; color:var(--warning); margin-right: 4px;"></i>
+                      <span>評価</span>
+                    </div>
+                    <div id="right-ratingFilterContainer" onclick="event.stopPropagation()" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--text-sub);">
+                      <span>集計対象:</span>
+                      <select id="right-ratingFilterSelect" onchange="changeRatingFilter('right')" style="background: var(--bg); border: 1px solid var(--panel-border); color: var(--text-main); font-size: 0.7rem; padding: 0.1rem 0.3rem; border-radius: 4px; outline: none; cursor: pointer; font-family: inherit;">
+                        <option value="all">全員</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="rating-panel-content" id="right-ratingPanelContent">
+                    <div id="right-ratingAxesList"></div>
+                    <div class="rating-summary-row" id="right-ratingSummaryRow" style="display:none;"></div>
+                    <div id="right-adjustedRatingContainer" class="adjusted-rating-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--panel-border); font-size: 0.75rem;">
+                      <div style="display: flex; align-items: center; gap: 0.25rem;">
+                        <i data-lucide="trending-up" style="width:13px; height:13px; color: var(--accent);"></i>
+                        <span style="font-weight: 600;">偏差補正平均:</span>
+                        <span id="right-adjustedRatingValue" style="color: var(--accent); font-weight: bold;">未計算</span>
+                      </div>
+                      <button type="button" class="btn-icon" id="right-btnOpenAdjustedRating" onclick="openAdjustedRatingModal('right')" title="偏差補正評価を計算" style="padding: 2px 6px; font-size: 0.7rem; border: 1px solid var(--panel-border); border-radius: 4px; display: flex; align-items: center; gap: 0.2rem;">
+                        <i data-lucide="settings" style="width:11px; height:11px;"></i>
+                        <span>補正計算</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- タイトル行 (アコーディオントグル + タイトル) -->
@@ -493,6 +520,25 @@
               </div>
               <textarea class="content-textarea" id="right-memoContent" placeholder="内容を入力してください... (マークダウン対応)" disabled></textarea>
               <div class="preview-container" id="right-markdownPreview"></div>
+
+              <!-- 外部Webビューアコンテナ -->
+              <div class="external-web-pane" id="right-externalWebPane" style="display: none; flex-direction: column; height: 100%; width: 100%;">
+                <div class="web-address-bar" style="display: flex; gap: 0.5rem; padding: 0.5rem; border-bottom: 1px solid var(--panel-border); background: var(--sidebar-bg); align-items: center;">
+                  <input type="text" id="right-webAddressInput" placeholder="https://example.com" style="flex: 1; padding: 0.4rem 0.75rem; border: 1px solid var(--panel-border); border-radius: 6px; background: var(--bg); color: var(--text-main); font-family: inherit; font-size: 0.85rem;" />
+                  <button type="button" class="btn-primary" id="right-webGoBtn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.85rem; height: 32px; display: flex; align-items: center; justify-content: center;">移動</button>
+                  <button type="button" class="btn-secondary" id="right-webAddMemoBtn" title="現在のURLをメモに追加/新規作成" style="width: auto; padding: 0.4rem 1rem; font-size: 0.85rem; height: 32px; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                    <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i>
+                    <span>追加</span>
+                  </button>
+                  <button type="button" class="btn-secondary" id="right-webTransferBtn" title="反対側のペインへ移動して同期" style="padding: 0.4rem; height: 32px; width: 32px; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="arrow-right-left" style="width: 16px; height: 16px;"></i>
+                  </button>
+                </div>
+                <div class="web-iframe-container" id="right-webIframeContainer" style="flex: 1; position: relative; background: #fff;">
+                  <!-- iframeが動的に生成される -->
+                  <div class="web-hover-status" id="right-webHoverStatus" style="display: none;"></div>
+                </div>
+              </div>
 
               <div class="editor-empty-state" id="right-emptyState">
                 <p>メモを選択するか、新しく作成してください。</p>
@@ -1007,6 +1053,10 @@
             <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
             <span>メンテナンス</span>
           </button>
+          <button class="admin-menu-item" onclick="switchAdminTab('domains')" style="display: flex; align-items: center; gap: 0.5rem; width: 100%; border: none; background: transparent; padding: 0.5rem 0.75rem; border-radius: 6px; color: var(--text-sub); font-size: 0.85rem; font-weight: 500; cursor: pointer; text-align: left; transition: background 0.2s;">
+            <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+            <span>ドメイン互換性管理</span>
+          </button>
         </div>
         
         <!-- コンテンツエリア (右側) -->
@@ -1314,6 +1364,59 @@
             </div>
           </div>
 
+          <!-- 11. ドメイン互換性管理タブ -->
+          <div id="adminTab-domains" class="admin-tab-content" style="display: none;">
+            <div style="margin-bottom: 1.25rem; color:var(--text-sub); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>クラウド共有されている外部サイトの同期可否ドメイン一覧です。</span>
+              <button class="btn-primary" id="btnVerifyAllDomains" style="width: auto; padding: 0.4rem 1rem; font-size: 0.8rem; height: 30px; display: flex; align-items: center; gap: 0.25rem;">
+                <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>一括検証 (Scan All)
+              </button>
+            </div>
+            
+            <!-- スキャン進捗インジケータ -->
+            <div id="domainScanProgressContainer" style="display: none; background: var(--sidebar-bg); border: 1px solid var(--panel-border); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                <span id="domainScanStatusText" style="font-weight: 600; color: var(--accent);">スキャンを実行中...</span>
+                <span id="domainScanProgressRatio">0 / 0</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: rgba(128,128,128,0.2); border-radius: 3px; overflow: hidden;">
+                <div id="domainScanProgressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.2s;"></div>
+              </div>
+            </div>
+
+            <!-- 新規ドメイン追加フォーム -->
+            <form id="adminDomainAddForm" style="background: var(--sidebar-bg); border: 1px solid var(--panel-border); padding: 1rem; border-radius: 8px; display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.5rem;">
+              <div style="flex: 1;">
+                <label class="form-label" for="newDomainInput" style="font-size: 0.8rem;">ドメイン名 (例: gamewiki.com)</label>
+                <input type="text" id="newDomainInput" placeholder="ドメインを入力..." style="font-size: 0.8rem; height: 34px; box-sizing: border-box; width: 100%;" class="form-input" required>
+              </div>
+              <div style="display: flex; align-items: center; height: 34px; margin-bottom: 4px;">
+                <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-main);">
+                  <input type="checkbox" id="newDomainSyncCheck" checked style="width: 14px; height: 14px;">
+                  <span>同期可能 (can_sync)</span>
+                </label>
+              </div>
+              <button type="submit" class="btn-primary" style="width: auto; height: 34px; padding: 0 1.25rem; font-size: 0.8rem; margin-bottom: 2px;">登録</button>
+            </form>
+
+            <!-- ドメイン一覧テーブル -->
+            <div style="border: 1px solid var(--panel-border); border-radius: 8px; overflow: hidden; max-height: 250px; overflow-y: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+                <thead>
+                  <tr style="background: var(--sidebar-bg); border-bottom: 1px solid var(--panel-border); color: var(--text-sub);">
+                    <th style="padding: 0.75rem 1rem;">ドメイン</th>
+                    <th style="padding: 0.75rem 1rem; width: 120px;">同期可否</th>
+                    <th style="padding: 0.75rem 1rem;">最終検証日時</th>
+                    <th style="padding: 0.75rem 1rem; width: 100px; text-align: center;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="adminDomainTableBody">
+                  <!-- ドメインリストが動的に注入される -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
       
@@ -1388,6 +1491,7 @@
         <button class="btn-primary" onclick="runAdjustedRatingCalculation()">📐 計算＆確定</button>
       </div>
     </div>
+  </div>
   <!-- 一時フローティングメモ (Scratchpad) -->
   <div id="scratchpadWidget" class="scratchpad-widget">
     <div id="scratchpadHeader" class="scratchpad-header">
@@ -1441,6 +1545,10 @@
   <script src="js/adjusted_ratings.js"></script>
   <script src="js/scratchpad.js"></script>
   <script src="js/tags.js"></script>
+  <script src="js/web_viewer.js"></script>
   <script src="js/main.js"></script>
+
+  <!-- ドメイン一括検証用非表示コンテナ -->
+  <div id="hiddenVerifyContainer" style="display: none; width: 0; height: 0; overflow: hidden;"></div>
 </body>
 </html>

@@ -147,6 +147,7 @@ function syncPreviewUI(paneId = state.activePaneId, forceScrollAdjust = false) {
 
     pel.previewBtn.innerHTML = '<i data-lucide="edit-3" style="width:14px; height:14px;"></i>編集';
     pel.memoContent.style.display = 'none';
+    pel.markdownPreview.style.display = ''; // インラインの display: none をクリアしてCSSに任せる
     pel.markdownPreview.classList.add('active');
     pel.memoTitle.readOnly = true;
     pel.memoTitle.classList.add('readonly-title');
@@ -165,6 +166,7 @@ function syncPreviewUI(paneId = state.activePaneId, forceScrollAdjust = false) {
     if (typeof adjustTextareaHeight === 'function') {
       adjustTextareaHeight(textarea);
     }
+    pel.markdownPreview.style.display = 'none'; // 明示的にインラインスタイルで非表示にする
     pel.markdownPreview.classList.remove('active');
     
     if (!isReadOnlyByACL) {

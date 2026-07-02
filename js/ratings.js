@@ -553,17 +553,22 @@ async function singleToggle(targetUserId, axisId, visible) {
 // 一括トグル
 async function bulkToggle(mode, targetUserId = null, axisId = null) {
   try {
+    const paneId = state.activePaneId;
+    const activeMemoId = state.panes[paneId].activeMemoId;
+    
     const body = { mode };
     if (targetUserId !== null) body.target_user_id = targetUserId;
     if (axisId !== null) body.axis_id = axisId;
+    if (activeMemoId && typeof activeMemoId !== 'string') {
+      body.memo_id = activeMemoId;
+    }
+    
     await fetch(`${API_URL}/visibility/bulk`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       body: JSON.stringify(body)
     });
     await renderToggleGrid();
-    const paneId = state.activePaneId;
-    const activeMemoId = state.panes[paneId].activeMemoId;
     if (activeMemoId && typeof activeMemoId !== 'string') {
       const visRes = await fetch(`${API_URL}/memos/${activeMemoId}/visibility`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
       if (visRes.ok) {

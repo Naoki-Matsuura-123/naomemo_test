@@ -1957,10 +1957,7 @@
       display: inline-block;
       user-select: none;
     }
-    .share-mode-toggle-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
+.share-mode-toggle-wrapper {
       padding: 0.25rem 0.5rem;
       background: rgba(128, 128, 128, 0.04);
       border: 1px solid var(--panel-border);
@@ -2067,7 +2064,8 @@
     body.theme-light .card-text {
       background: #ffffff;
       border-top-color: #d0d7de;
-    }
+    }
+
 /* --- 評価パネルのアコーディオン拡張 --- */
 .rating-panel-header {
   cursor: pointer;
@@ -2146,20 +2144,21 @@
 
 .dropdown-panel {
   display: none;
-  position: absolute;
+  position: absolute; /* アコーディオンの外へ突き抜けるように absolute に戻す */
   top: 100%;
   left: 0;
   width: 100%;
+  min-width: 240px; /* フォルダ名の見切れを防ぐため最小幅を確保 */
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 1000; /* 優先度を引き上げて貫通を防ぐ */
+  z-index: 1000;
   margin-top: 4px;
   padding: 0.4rem;
   flex-direction: column;
   gap: 0.4rem;
-  opacity: 1 !important;
+  box-sizing: border-box;
 }
 
 .dropdown-panel.active {
@@ -2356,7 +2355,7 @@
   border: 1px solid var(--panel-border);
   color: var(--text-main);
   font-size: 0.65rem;
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.1s;
@@ -2406,64 +2405,21 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.filter-chip .remove-btn {
-  background: transparent;
-  border: none;
-  color: inherit;
-  font-size: 0.8rem;
-  line-height: 1;
-  padding: 0 1px;
-  cursor: pointer;
-  display: flex;
+.meta-toggle-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-}
-.filter-chip .remove-btn:hover {
-  opacity: 0.7;
-}
-
-/* --- メタ情報アコーディオン --- */
-.meta-accordion-content {
-  max-height: 800px;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
-  opacity: 1;
-  margin-bottom: 0.5rem;
-}
-.meta-accordion-content.collapsed {
-  max-height: 0;
-  opacity: 0;
-  margin-bottom: 0;
-  pointer-events: none;
-}
-
-.editor-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  width: 100%;
-  max-width: var(--editor-max-width);
-  margin-left: auto !important;
-  margin-right: auto !important;
-  position: relative;
-}
-
-.meta-toggle-btn {
   width: 28px;
   height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 4px;
   background: transparent;
   border: none;
   cursor: pointer;
   color: var(--text-sub);
   transition: background-color 0.2s, color 0.2s;
-  margin-left: -6px;
   flex-shrink: 0;
 }
+
 .meta-toggle-btn:hover {
   background-color: rgba(128, 128, 128, 0.1);
   color: var(--text-main);
@@ -2474,8 +2430,50 @@
   height: 16px;
   transition: transform 0.25s ease;
 }
+
 .meta-toggle-icon.collapsed {
   transform: rotate(-90deg);
+}
+
+/* メタデータアコーディオン */
+.meta-accordion-content {
+  display: block;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+  max-height: 800px; /* 縦スクロール制限を追加 */
+  opacity: 1;
+  overflow: visible; /* スクロール可能にする */
+  position: relative;
+  z-index: 50;
+}
+
+.meta-accordion-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  z-index: 1;
+}
+
+.editor-title-row {
+  display: flex;
+  align-items: center;
+  position: relative; /* トグル矢印を絶対配置するため */
+  width: 100%;
+  max-width: var(--editor-max-width);
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
+}
+
+.editor-title-row .meta-toggle-btn {
+  position: absolute;
+  left: -36px; /* トグル矢印の幅+ギャップ分左へ配置 */
+  top: 50%;
+  transform: translateY(-50%);
+  flex-shrink: 0;
 }
 
 .editor-title-row .title-input {
@@ -2485,5 +2483,78 @@
   max-width: none;
 }
 
+/* --- 外部Webビューア ＆ ドメイン互換性管理スタイル --- */
+.external-web-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--bg);
+}
 
+.web-address-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: var(--sidebar-bg);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.web-iframe-container {
+  flex: 1;
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.web-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #fff;
+}
+
+/* 一括検証時のプログレスバーアニメーション */
+#domainScanProgressBar {
+  transition: width 0.3s ease-in-out;
+}
+
+/* アコーディオン内の各コンテナおよび評価パネルの左端を本文に揃える */
+[id$="-memoFolderContainer"],
+[id$="-memoTagContainer"],
+[id$="-imagePasteConfig"],
+.rating-panel {
+  max-width: var(--editor-max-width);
+  width: 100%;
+  margin-left: auto !important; /* 左端を揃えるため中央寄せにする */
+  margin-right: auto !important;
+  box-sizing: border-box;
+}
+
+/* Webビューアのリンクホバーステータスバー */
+.web-hover-status {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  max-width: 80%;
+  padding: 4px 8px;
+  background: rgba(15, 17, 21, 0.85); /* 半透明黒背景（モダンダークのbgと同系） */
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #e3e6eb; /* 白文字 */
+  font-family: var(--font-mono); /* 等幅フォント */
+  font-size: 0.75rem;
+  pointer-events: none; /* マウスイベント透過 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.15s ease;
+}
 

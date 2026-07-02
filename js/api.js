@@ -123,7 +123,10 @@ function mergeMemos(serverMemos) {
           if (paneState.isPreviewActive) compileMarkdown(paneId);
         }
       } else {
-        closePaneTab(paneId, paneState.activeMemoId);
+        // web- タブは memos キャッシュに載らないので閉じない
+        if (typeof paneState.activeMemoId !== 'string' || !paneState.activeMemoId.startsWith('web-')) {
+          closePaneTab(paneId, paneState.activeMemoId);
+        }
       }
     }
   });
